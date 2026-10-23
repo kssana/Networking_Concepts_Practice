@@ -7,31 +7,11 @@ from typing import Dict, Optional
 
 
 def ip_to_int(ip_str: str) -> int:
-    """
-    Convert a dotted-decimal IPv4 string (e.g. "192.168.1.15") into a 32-bit integer.
-    
-    Explanation:
-    - Split "192.168.1.15" into 4 integer octets: [192, 168, 1, 15].
-    - Shift octet 0 left by 24 bits (occupies bits 24..31).
-    - Shift octet 1 left by 16 bits (occupies bits 16..23).
-    - Shift octet 2 left by 8 bits  (occupies bits 8..15).
-    - Octet 3 occupies the lowest bits (0..7).
-    - Combine them using bitwise OR (|).
-    """
     octets = [int(part) for part in ip_str.split(".")]
     return (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) | octets[3]
 
 
 def is_local_network(my_ip: str, target_ip: str, netmask: str) -> bool:
-    """
-    Determines if target_ip is on the same local subnet as my_ip using netmask.
-    
-    Explanation:
-    - Convert all three dotted strings into 32-bit integers.
-    - Applying bitwise AND (&) with netmask strips away the host portion,
-      leaving ONLY the Network portion (the street name).
-    - If (my_ip & mask) == (target_ip & mask), both devices reside on the same wire!
-    """
     my_int = ip_to_int(my_ip)
     target_int = ip_to_int(target_ip)
     mask_int = ip_to_int(netmask)
@@ -51,18 +31,7 @@ def route_and_build_frame(
     payload: str,
     arp_table: Dict[str, str]
 ) -> Dict:
-    """
-    Simulates the core routing and frame encapsulation logic of an OS network stack.
     
-    Explanation:
-    1. Ask: Is target_ip on our local subnet?
-       - If YES: We can talk directly to target_ip. Next-Hop IP = target_ip.
-       - If NO:  We cannot reach it directly. Next-Hop IP = default_gateway_ip (our home router).
-    2. Consult the ARP cache to find the MAC address of that Next-Hop IP.
-    3. Construct the packet:
-       - Layer 3 (IP): Source IP is my_ip; Destination IP is ALWAYS target_ip.
-       - Layer 2 (Ethernet): Source MAC is my_mac; Destination MAC is Next-Hop MAC.
-    """
     # Step 1: Subnet check
     is_local = is_local_network(my_ip, target_ip, netmask)
 
@@ -91,10 +60,6 @@ def route_and_build_frame(
         }
     }
 
-
-# =====================================================================
-# TEST HARNESS
-# =====================================================================
 if __name__ == "__main__":
     print("=" * 65)
     print("  RUNNING TESTS: HOST-TO-GATEWAY ROUTING SIMULATOR")
